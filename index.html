@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ai nhanh hơn – Bài 27: Công cụ vẽ và một số ứng dụng</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ocean:#0E3B53; --ocean2:#0A2C3F; --teal:#1B998B; --mint:#E6F6F2;
+  --sun:#FFC145; --violet:#7B61FF; --ok:#22C55E; --bad:#EF4444; --ink:#0B2533;
+  --A:#1B998B; --B:#7B61FF; --C:#F2A93B; --D:#E0567A;
+  --font:"Be Vietnam Pro","Segoe UI",Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--font);color:#fff;background:radial-gradient(1200px 700px at 15% 10%,#16526f 0%,transparent 60%),radial-gradient(900px 600px at 90% 90%,#127a73 0%,transparent 55%),linear-gradient(160deg,var(--ocean) 0%,var(--ocean2) 100%);min-height:100vh;overflow-x:hidden}
+.bg-layers{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.bg-layers span{position:absolute;border-radius:28px;border:2px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);transform:skewX(-14deg);animation:float 14s ease-in-out infinite}
+.bg-layers span:nth-child(1){width:340px;height:220px;left:-60px;top:12%}
+.bg-layers span:nth-child(2){width:300px;height:200px;left:-20px;top:16%;animation-delay:-4s;border-color:rgba(255,193,69,.18)}
+.bg-layers span:nth-child(3){width:380px;height:240px;right:-90px;bottom:8%;animation-delay:-2s}
+.bg-layers span:nth-child(4){width:320px;height:210px;right:-40px;bottom:12%;animation-delay:-7s;border-color:rgba(27,153,139,.35)}
+@keyframes float{0%,100%{translate:0 0}50%{translate:0 -18px}}
+.wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:28px 28px 120px;min-height:100vh;display:flex;flex-direction:column}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}
+.brand{display:flex;align-items:center;gap:14px}
+.logo{width:52px;height:52px;border-radius:16px;background:var(--sun);display:grid;place-items:center;color:var(--ocean);box-shadow:0 8px 22px rgba(255,193,69,.35)}
+.brand h1{font-size:22px;font-weight:800;letter-spacing:.2px}
+.brand p{font-size:14px;opacity:.75}
+.icon-btn{border:0;background:rgba(255,255,255,.1);color:#fff;border-radius:14px;padding:10px 14px;font:600 15px var(--font);cursor:pointer;display:flex;gap:8px;align-items:center}
+.icon-btn:hover{background:rgba(255,255,255,.18)}
+.screen{display:none;flex:1;animation:in .5s ease both}
+.screen.active{display:flex;flex-direction:column}
+@keyframes in{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+/* START */
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:28px;align-items:center;flex:1}
+.hero h2{font-size:clamp(44px,6vw,78px);line-height:1.02;font-weight:800}
+.hero h2 em{font-style:normal;color:var(--sun)}
+.hero .sub{font-size:20px;opacity:.85;margin:16px 0 26px;max-width:560px;line-height:1.5}
+.rules{display:grid;gap:12px;margin-bottom:8px}
+.rule{display:flex;gap:12px;align-items:center;font-size:17px;background:rgba(255,255,255,.06);padding:12px 16px;border-radius:14px}
+.rule b{display:grid;place-items:center;min-width:34px;height:34px;border-radius:50%;background:var(--teal);font-size:16px}
+.card{background:rgba(255,255,255,.96);color:var(--ink);border-radius:26px;padding:26px;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+.card h3{font-size:22px;margin-bottom:6px}
+.card .hint{font-size:14px;color:#557;margin-bottom:16px}
+.seg{display:flex;gap:10px;margin-bottom:16px}
+.seg button{flex:1;padding:12px;border-radius:14px;border:2px solid #cfe3df;background:#fff;font:700 18px var(--font);color:var(--ocean);cursor:pointer}
+.seg button.on{background:var(--ocean);border-color:var(--ocean);color:#fff}
+.teams-in{display:grid;gap:10px;margin-bottom:18px}
+.teams-in label{display:flex;align-items:center;gap:10px}
+.dot{width:16px;height:16px;border-radius:50%;flex:none}
+.teams-in input{flex:1;padding:12px 14px;border-radius:12px;border:2px solid #dbe9e6;font:600 17px var(--font);color:var(--ink);outline:none}
+.teams-in input:focus{border-color:var(--teal)}
+.btn{border:0;cursor:pointer;font:800 20px var(--font);padding:16px 26px;border-radius:16px;background:var(--sun);color:var(--ocean);box-shadow:0 10px 0 #d99a1c,0 18px 30px rgba(0,0,0,.25);transition:transform .08s,box-shadow .08s;display:inline-flex;align-items:center;gap:10px;justify-content:center}
+.btn:active{transform:translateY(6px);box-shadow:0 4px 0 #d99a1c,0 8px 16px rgba(0,0,0,.25)}
+.btn.full{width:100%}
+.btn.teal{background:var(--teal);color:#fff;box-shadow:0 10px 0 #12756a,0 18px 30px rgba(0,0,0,.25)}
+/* QUESTION */
+.qtop{display:flex;align-items:center;gap:18px;margin-bottom:18px}
+.progress{flex:1;height:12px;background:rgba(255,255,255,.12);border-radius:99px;overflow:hidden}
+.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--sun));border-radius:99px;transition:width .5s}
+.qnum{font-weight:800;font-size:18px;background:rgba(255,255,255,.1);padding:8px 14px;border-radius:12px;white-space:nowrap}
+.timer{position:relative;width:86px;height:86px;flex:none}
+.timer svg{transform:rotate(-90deg)}
+.timer .t{position:absolute;inset:0;display:grid;place-items:center;font-size:30px;font-weight:800}
+.timer.warn .t{color:var(--sun);animation:pulse .6s infinite}
+@keyframes pulse{50%{transform:scale(1.15)}}
+.question{background:#fff;color:var(--ink);border-radius:26px;padding:30px 34px;font-size:clamp(26px,3.1vw,38px);font-weight:700;line-height:1.35;box-shadow:0 22px 50px rgba(0,0,0,.3);margin-bottom:22px;min-height:150px;display:flex;align-items:center}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.opt{position:relative;display:flex;align-items:center;gap:16px;text-align:left;border:0;cursor:pointer;border-radius:22px;padding:20px 22px;color:#fff;font:700 clamp(20px,2.3vw,28px)/1.3 var(--font);box-shadow:0 8px 0 rgba(0,0,0,.22);transition:transform .15s,filter .2s,opacity .3s}
+.opt:hover:not(:disabled){transform:translateY(-3px)}
+.opt .k{flex:none;width:52px;height:52px;border-radius:14px;background:rgba(255,255,255,.22);display:grid;place-items:center;font-size:26px;font-weight:800}
+.opt[data-k="A"]{background:var(--A)}.opt[data-k="B"]{background:var(--B)}.opt[data-k="C"]{background:var(--C)}.opt[data-k="D"]{background:var(--D)}
+.opt.dim{opacity:.35;filter:grayscale(.6)}
+.opt.right{outline:6px solid #fff;animation:pop .5s}
+.opt.right::after{content:"✓";position:absolute;right:18px;top:50%;translate:0 -50%;width:46px;height:46px;border-radius:50%;background:#fff;color:var(--ok);display:grid;place-items:center;font-size:30px}
+.opt.wrong{animation:shake .4s}
+.opt.wrong::after{content:"✕";position:absolute;right:18px;top:50%;translate:0 -50%;width:46px;height:46px;border-radius:50%;background:#fff;color:var(--bad);display:grid;place-items:center;font-size:26px}
+@keyframes pop{40%{transform:scale(1.04)}}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.explain{margin-top:20px;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.18);border-radius:18px;padding:16px 20px;font-size:20px;line-height:1.5;display:none}
+.explain.show{display:block;animation:in .4s}
+.explain b{color:var(--sun)}
+.actions{display:flex;justify-content:flex-end;margin-top:20px;gap:12px}
+/* SCOREBAR */
+.scorebar{position:fixed;left:0;right:0;bottom:0;z-index:5;background:rgba(6,28,40,.85);backdrop-filter:blur(8px);border-top:1px solid rgba(255,255,255,.1);padding:12px 20px;display:none}
+.scorebar.show{display:block}
+.scorebar .in{max-width:1200px;margin:0 auto;display:flex;gap:12px;align-items:center}
+.scorebar .lab{font-size:14px;opacity:.7;white-space:nowrap}
+.team{flex:1;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);border-radius:14px;padding:8px 10px 8px 14px}
+.team .nm{flex:1;font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.team .sc{font-weight:800;font-size:24px;min-width:34px;text-align:center}
+.team button{border:0;border-radius:10px;width:36px;height:36px;font:800 20px var(--font);cursor:pointer;background:var(--sun);color:var(--ocean)}
+.team button.minus{background:rgba(255,255,255,.15);color:#fff}
+.team.bump{animation:pop .4s}
+/* END */
+.podium{display:flex;gap:18px;justify-content:center;align-items:flex-end;margin:20px 0 30px;flex-wrap:wrap}
+.pod{width:220px;text-align:center}
+.pod .bar{border-radius:20px 20px 8px 8px;display:grid;place-items:center;font-size:44px;font-weight:800;color:var(--ocean);box-shadow:0 18px 40px rgba(0,0,0,.3)}
+.pod .nm{font-size:22px;font-weight:800;margin-bottom:10px}
+.pod .pts{font-size:16px;opacity:.85;margin-top:10px}
+.end-title{text-align:center;font-size:clamp(38px,5vw,64px);font-weight:800}
+.end-sub{text-align:center;font-size:20px;opacity:.8;margin-top:8px}
+canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:9}
+.kbd{font-size:13px;opacity:.6;text-align:center;margin-top:14px}
+@media (max-width:860px){.hero{grid-template-columns:1fr}.opts{grid-template-columns:1fr}.scorebar .lab{display:none}}
+</style>
+</head>
+<body>
+<div class="bg-layers"><span></span><span></span><span></span><span></span></div>
+<canvas id="fx"></canvas>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>
+      </div>
+      <div><h1>Ai nhanh hơn?</h1><p>Tin học 11 · Bài 27: Công cụ vẽ và một số ứng dụng</p></div>
+    </div>
+    <button class="icon-btn" id="fsBtn" title="Toàn màn hình (phím F)">⛶ Toàn màn hình</button>
+  </header>
+
+  <!-- START -->
+  <section class="screen active" id="sStart">
+    <div class="hero">
+      <div>
+        <h2>Ôn nhanh<br><em>Lớp ảnh</em> &amp; <em>Công cụ vẽ</em></h2>
+        <p class="sub">6 câu hỏi củng cố kiến thức Tiết 1. Mỗi câu có 20 giây, đội nào giơ tay trả lời đúng trước được cộng 1 điểm.</p>
+        <div class="rules">
+          <div class="rule"><b>1</b>GV đọc câu hỏi, đồng hồ bắt đầu đếm ngược 20 giây.</div>
+          <div class="rule"><b>2</b>Đội giơ tay nhanh nhất trả lời. GV bấm vào đáp án đội chọn.</div>
+          <div class="rule"><b>3</b>Trả lời đúng: bấm <b style="background:var(--sun);color:var(--ocean)">+</b> ở tên đội để cộng điểm.</div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Thiết lập trò chơi</h3>
+        <p class="hint">Chọn số đội và đặt tên đội.</p>
+        <div class="seg" id="seg"><button data-n="2">2 đội</button><button data-n="3">3 đội</button><button data-n="4" class="on">4 đội</button></div>
+        <div class="teams-in" id="teamsIn"></div>
+        <button class="btn full" id="startBtn">▶ Bắt đầu chơi</button>
+        <p class="kbd">Phím tắt: 1–4 chọn đáp án · Enter câu tiếp · F toàn màn hình</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUESTION -->
+  <section class="screen" id="sQ">
+    <div class="qtop">
+      <div class="qnum" id="qnum">Câu 1/6</div>
+      <div class="progress"><i id="prog" style="width:0"></i></div>
+      <div class="timer" id="timer">
+        <svg width="86" height="86"><circle cx="43" cy="43" r="36" stroke="rgba(255,255,255,.15)" stroke-width="9" fill="none"/><circle id="ring" cx="43" cy="43" r="36" stroke="#FFC145" stroke-width="9" fill="none" stroke-linecap="round" stroke-dasharray="226.2" stroke-dashoffset="0"/></svg>
+        <div class="t" id="tnum">20</div>
+      </div>
+    </div>
+    <div class="question" id="qtext"></div>
+    <div class="opts" id="opts"></div>
+    <div class="explain" id="explain"></div>
+    <div class="actions">
+      <button class="icon-btn" id="revealBtn">👁 Hiện đáp án</button>
+      <button class="btn teal" id="nextBtn">Câu tiếp theo ➜</button>
+    </div>
+  </section>
+
+  <!-- END -->
+  <section class="screen" id="sEnd">
+    <div class="end-title">🏆 Kết quả chung cuộc</div>
+    <div class="end-sub" id="endSub"></div>
+    <div class="podium" id="podium"></div>
+    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+      <button class="btn" id="againBtn">↻ Chơi lại</button>
+      <button class="btn teal" id="homeBtn">⌂ Về màn hình đầu</button>
+    </div>
+  </section>
+</div>
+
+<div class="scorebar" id="scorebar"><div class="in" id="scoreIn"></div></div>
+
+<script>
+const QUESTIONS = [
+  { q: "Các lớp ảnh trong GIMP được sắp xếp theo thứ tự hiển thị như thế nào?",
+    o: ["Từ trên xuống dưới", "Từ dưới lên trên", "Theo tên lớp", "Theo thời gian tạo"], a: 1,
+    e: "Các lớp ảnh được sắp theo thứ tự hiển thị <b>từ dưới lên trên</b>; lớp nằm trên sẽ che lớp nằm dưới." },
+  { q: "Biểu tượng con mắt bên cạnh tên lớp trong hộp thoại Layers cho biết điều gì?",
+    o: ["Lớp đang được chỉnh sửa", "Lớp có kênh alpha", "Lớp được hiển thị", "Lớp bị khoá"], a: 2,
+    e: "Có hình con mắt thì lớp <b>được hiển thị</b>; không có thì lớp bị ẩn (như lớp Org trong Hình 27.2)." },
+  { q: "Công cụ nào dùng để tô màu chuyển sắc cho vùng chọn?",
+    o: ["Paint Brush", "Bucket Fill", "Gradient", "Eraser"], a: 2,
+    e: "<b>Gradient</b> tô màu chuyển sắc, mặc định chuyển từ màu nổi sang màu nền." },
+  { q: "Công cụ nào vẽ bằng cách sao chép chính xác một vùng chọn?",
+    o: ["Clone", "Healing", "Bucket Fill", "Color Picker"], a: 0,
+    e: "<b>Clone</b> sao chép chính xác vùng nguồn; Healing thì hoà trộn mẫu với điểm ảnh tại vị trí cần sửa." },
+  { q: "Dùng Eraser trên lớp KHÔNG có kênh alpha thì điểm ảnh bị xoá sẽ như thế nào?",
+    o: ["Trở nên trong suốt", "Có màu nổi", "Có màu nền", "Không thay đổi"], a: 2,
+    e: "Lớp không có kênh alpha giống tờ giấy: điểm ảnh bị xoá mang <b>màu nền</b>. Có kênh alpha thì điểm ảnh trong suốt." },
+  { q: "Lệnh nào dùng để thêm kênh alpha cho một lớp ảnh?",
+    o: ["New Layer", "Add Alpha Channel", "Duplicate Layer", "Merge Down"], a: 1,
+    e: "Nháy nút phải chuột vào lớp và chọn <b>Add Alpha Channel</b> (xoá: Remove Alpha Channel)." }
+];
+const TEAM_COLORS = ["#1B998B", "#7B61FF", "#F2A93B", "#E0567A"];
+const LIMIT = 20;
+let nTeams = 4, teams = [], cur = 0, answered = false, tLeft = LIMIT, tick = null;
+const $ = (id) => document.getElementById(id);
+
+/* ---------- âm thanh (WebAudio, chạy được offline) ---------- */
+let ac = null;
+function beep(freq, dur, type = "sine", vol = .15, when = 0) {
+  try {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = type; o.frequency.value = freq; g.gain.value = vol;
+    o.connect(g); g.connect(ac.destination);
+    const t = ac.currentTime + when;
+    o.start(t); g.gain.exponentialRampToValueAtTime(.0001, t + dur); o.stop(t + dur);
+  } catch (e) {}
+}
+const sOk = () => { beep(660, .15, "triangle"); beep(880, .25, "triangle", .15, .12); };
+const sBad = () => { beep(220, .35, "sawtooth", .08); };
+const sTick = () => beep(1000, .05, "square", .04);
+const sWin = () => [523, 659, 784, 1047].forEach((f, i) => beep(f, .3, "triangle", .14, i * .14));
+
+/* ---------- thiết lập đội ---------- */
+function renderTeamInputs() {
+  const box = $("teamsIn"); const old = [...box.querySelectorAll("input")].map(i => i.value);
+  box.innerHTML = "";
+  for (let i = 0; i < nTeams; i++) {
+    const l = document.createElement("label");
+    l.innerHTML = `<span class="dot" style="background:${TEAM_COLORS[i]}"></span><input maxlength="20" value="${old[i] || "Đội " + (i + 1)}" aria-label="Tên đội ${i + 1}">`;
+    box.appendChild(l);
+  }
+}
+$("seg").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  [...$("seg").children].forEach(x => x.classList.toggle("on", x === b));
+  nTeams = +b.dataset.n; renderTeamInputs();
+});
+renderTeamInputs();
+
+function show(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("active", s.id === id));
+  $("scorebar").classList.toggle("show", id === "sQ");
+}
+
+function renderScores() {
+  const box = $("scoreIn");
+  box.innerHTML = `<span class="lab">Điểm các đội</span>` + teams.map((t, i) => `
+    <div class="team" id="team${i}" style="border:2px solid ${t.c}">
+      <span class="dot" style="background:${t.c}"></span><span class="nm">${t.name}</span>
+      <button class="minus" data-i="${i}" data-d="-1" aria-label="Trừ điểm ${t.name}">−</button>
+      <span class="sc">${t.s}</span>
+      <button data-i="${i}" data-d="1" aria-label="Cộng điểm ${t.name}">+</button>
+    </div>`).join("");
+}
+$("scoreIn").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  const t = teams[+b.dataset.i]; t.s = Math.max(0, t.s + +b.dataset.d);
+  renderScores(); const el = $("team" + b.dataset.i); el.classList.add("bump");
+  if (+b.dataset.d > 0) sOk();
+});
+
+/* ---------- câu hỏi ---------- */
+function startGame() {
+  teams = [...$("teamsIn").querySelectorAll("input")].map((inp, i) => ({ name: inp.value.trim() || "Đội " + (i + 1), s: 0, c: TEAM_COLORS[i] }));
+  cur = 0; renderScores(); show("sQ"); loadQ();
+}
+function loadQ() {
+  const Q = QUESTIONS[cur]; answered = false;
+  $("qnum").textContent = `Câu ${cur + 1}/${QUESTIONS.length}`;
+  $("prog").style.width = (cur / QUESTIONS.length * 100) + "%";
+  $("qtext").textContent = Q.q;
+  $("explain").classList.remove("show");
+  $("nextBtn").textContent = cur === QUESTIONS.length - 1 ? "Xem kết quả 🏆" : "Câu tiếp theo ➜";
+  const box = $("opts"); box.innerHTML = "";
+  Q.o.forEach((txt, i) => {
+    const k = "ABCD"[i]; const b = document.createElement("button");
+    b.className = "opt"; b.dataset.k = k; b.dataset.i = i;
+    b.innerHTML = `<span class="k">${k}</span><span>${txt}</span>`;
+    b.style.animation = `in .45s ${i * .08}s both`;
+    b.addEventListener("click", () => choose(i));
+    box.appendChild(b);
+  });
+  startTimer();
+}
+function startTimer() {
+  clearInterval(tick); tLeft = LIMIT; drawTimer();
+  tick = setInterval(() => {
+    tLeft--; drawTimer();
+    if (tLeft <= 5 && tLeft > 0) sTick();
+    if (tLeft <= 0) { clearInterval(tick); if (!answered) reveal(null, true); }
+  }, 1000);
+}
+function drawTimer() {
+  $("tnum").textContent = Math.max(0, tLeft);
+  $("ring").style.strokeDashoffset = 226.2 * (1 - Math.max(0, tLeft) / LIMIT);
+  $("ring").style.stroke = tLeft <= 5 ? "#EF4444" : "#FFC145";
+  $("timer").classList.toggle("warn", tLeft <= 5 && tLeft > 0);
+}
+function choose(i) { if (answered) return; reveal(i); }
+function reveal(picked, timeout) {
+  answered = true; clearInterval(tick); $("timer").classList.remove("warn");
+  const Q = QUESTIONS[cur];
+  [...$("opts").children].forEach((b, i) => {
+    b.disabled = true;
+    if (i === Q.a) b.classList.add("right");
+    else if (i === picked) b.classList.add("wrong");
+    else b.classList.add("dim");
+  });
+  if (picked === null) { if (timeout) sBad(); } else if (picked === Q.a) { sOk(); burst(80); } else sBad();
+  const head = picked === null ? (timeout ? "⏰ Hết giờ! " : "👁 ") : picked === Q.a ? "🎉 Chính xác! " : "❌ Chưa đúng. ";
+  $("explain").innerHTML = `${head}Đáp án đúng: <b>${"ABCD"[Q.a]}. ${Q.o[Q.a]}</b><br>${Q.e}`;
+  $("explain").classList.add("show");
+}
+function next() {
+  if (!answered) { reveal(null); return; }
+  if (cur < QUESTIONS.length - 1) { cur++; loadQ(); }
+  else endGame();
+}
+$("startBtn").addEventListener("click", startGame);
+$("nextBtn").addEventListener("click", next);
+$("revealBtn").addEventListener("click", () => { if (!answered) reveal(null); });
+
+/* ---------- kết thúc ---------- */
+function endGame() {
+  clearInterval(tick); $("prog").style.width = "100%"; show("sEnd");
+  const sorted = [...teams].sort((a, b) => b.s - a.s);
+  const top = sorted[0].s, winners = sorted.filter(t => t.s === top);
+  $("endSub").textContent = top === 0 ? "Chưa đội nào ghi điểm – cùng ôn lại nhé!" :
+    winners.length > 1 ? `Đồng hạng nhất: ${winners.map(w => w.name).join(", ")}` : `Chúc mừng ${winners[0].name}!`;
+  const heights = [230, 170, 130, 100], medals = ["🥇", "🥈", "🥉", "🎖"];
+  const order = sorted.length >= 3 ? [1, 0, 2, 3].filter(i => i < sorted.length) : sorted.map((_, i) => i);
+  $("podium").innerHTML = order.map(r => { const t = sorted[r]; return `
+    <div class="pod" style="animation:in .6s ${r * .15}s both"><div class="nm">${medals[r]} ${t.name}</div>
+    <div class="bar" style="height:${heights[r]}px;background:${t.c};color:#fff">${t.s}</div>
+    <div class="pts">${t.s} điểm</div></div>`; }).join("");
+  sWin(); burst(260);
+}
+$("againBtn").addEventListener("click", startGame);
+$("homeBtn").addEventListener("click", () => show("sStart"));
+
+/* ---------- toàn màn hình & phím tắt ---------- */
+function fs() { try { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); } catch (e) {} }
+$("fsBtn").addEventListener("click", fs);
+document.addEventListener("keydown", (e) => {
+  if (e.target.tagName === "INPUT") return;
+  if (e.key === "f" || e.key === "F") fs();
+  if ($("sQ").classList.contains("active")) {
+    if (["1", "2", "3", "4"].includes(e.key)) choose(+e.key - 1);
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); next(); }
+  }
+});
+
+/* ---------- pháo giấy ---------- */
+const cv = $("fx"), cx = cv.getContext("2d"); let parts = [];
+function size() { cv.width = innerWidth; cv.height = innerHeight; } size(); addEventListener("resize", size);
+function burst(n) {
+  const cols = ["#FFC145", "#1B998B", "#7B61FF", "#E0567A", "#ffffff"];
+  for (let i = 0; i < n; i++) parts.push({ x: innerWidth / 2 + (Math.random() - .5) * 300, y: innerHeight * .35, vx: (Math.random() - .5) * 16, vy: -Math.random() * 14 - 4, r: Math.random() * 7 + 4, c: cols[i % cols.length], rot: Math.random() * 6, life: 120 + Math.random() * 60 });
+  if (parts.length === n) loop();
+}
+function loop() {
+  cx.clearRect(0, 0, cv.width, cv.height);
+  parts.forEach(p => { p.vy += .35; p.x += p.vx; p.y += p.vy; p.rot += .15; p.life--; cx.save(); cx.translate(p.x, p.y); cx.rotate(p.rot); cx.fillStyle = p.c; cx.fillRect(-p.r / 2, -p.r / 2, p.r, p.r * .6); cx.restore(); });
+  parts = parts.filter(p => p.life > 0 && p.y < cv.height + 40);
+  if (parts.length) requestAnimationFrame(loop); else cx.clearRect(0, 0, cv.width, cv.height);
+}
+</script>
+</body>
+</html>
